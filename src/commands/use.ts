@@ -1,22 +1,31 @@
+import { OFFICIAL_TARGET } from "../constants.js";
 import { loadConfig } from "../config.js";
-import { selectProfile } from "../prompts.js";
-import { switchToProfile } from "../switch.js";
+import { isBackValue } from "../prompt-utils.js";
+import { selectUseTarget } from "../prompts.js";
+import { switchToOfficial, switchToProfile } from "../switch.js";
 
 export async function useProfile(name?: string): Promise<void> {
+  if (name === "official" || name === OFFICIAL_TARGET) {
+    await switchToOfficial();
+    return;
+  }
+
   if (name) {
     await switchToProfile(name);
     return;
   }
 
   const config = await loadConfig();
-  if (config.profiles.length === 0) {
-    throw new Error("暂无 profile，请先使用 add 添加");
+  const selected = await selectUseTarget(config.profiles, config.active);
+
+  if (isBackValue(selected)) {
+    console.log("已取消");
+    return;
   }
 
-  const selected = await selectProfile(
-    config.profiles,
-    "选择要切换的 profile",
-    config.active,
-  );
-  await switchToProfile(selected);
+  if (selected === OFFICIAL_TARGET) {
+    await switchToOfficial();
+  } else {
+    await switchToProfile(selected);
+  }
 }

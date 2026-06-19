@@ -1,7 +1,8 @@
-import { checkbox, confirm } from "@inquirer/prompts";
 import { listCcSwitchImportCandidates, ccSwitchDbExists } from "../cc-switch.js";
 import { envToProfile } from "../claude-settings.js";
 import { loadConfig, upsertProfile } from "../config.js";
+import { isBackValue, PROMPT_BACK } from "../prompt-utils.js";
+import { promptConfirm, selectCheckboxWithBack } from "../prompts.js";
 import { switchToProfile } from "../switch.js";
 import { CC_SWITCH_DB_PATH } from "../paths.js";
 import type { Profile } from "../types.js";
@@ -13,22 +14,26 @@ export interface ImportCcSwitchOptions {
   applyCurrent?: boolean;
 }
 
+type ImportCandidate = Awaited<
+  ReturnType<typeof listCcSwitchImportCandidates>
+>["importable"][number];
+
 async function pickCandidates(
-  candidates: Awaited<
-    ReturnType<typeof listCcSwitchImportCandidates>
-  >["importable"],
-): Promise<typeof candidates> {
+  candidates: ImportCandidate[],
+): Promise<ImportCandidate[] | typeof PROMPT_BACK> {
   if (candidates.length === 0) return [];
 
-  const selected = await checkbox({
-    message: "选择要导入的 cc-switch Claude provider",
-    choices: candidates.map((item) => ({
+  const selected = await selectCheckboxWithBack(
+    "选择要导入的 cc-switch Claude provider",
+    candidates.map((item) => ({
       name: `${item.name}${item.isCurrent ? " (cc-switch 当前)" : ""} — ${item.env.ANTHROPIC_BASE_URL}`,
       value: item.id,
       checked: true,
     })),
-  });
+    { emptyMessage: "请至少选择一个 provider" },
+  );
 
+  if (isBackValue(selected)) return selected;
   return candidates.filter((item) => selected.includes(item.id));
 }
 
@@ -54,9 +59,12 @@ export async function importFromCcSwitch(
     console.log();
   }
 
-  const selected = options.all
-    ? importable
-    : await pickCandidates(importable);
+  const selected = options.all ? importable : await pickCandidates(importable);
+
+  if (isBackValue(selected)) {
+    console.log("已取消");
+    return;
+  }
 
   if (selected.length === 0) {
     console.log("未选择任何 provider，已取消导入。");
@@ -102,11 +110,12 @@ export async function importFromCcSwitch(
   const shouldApplyCurrent = options.applyCurrent
     ? true
     : !options.all && current
-      ? await confirm({
-          message: `是否切换到 cc-switch 当前 provider「${current.name}」？`,
-          default: true,
-        })
+      ? await promptConfirm(
+          `是否切换到 cc-switch 当前 provider「${current.name}」？`,
+        )
       : false;
+
+  if (isBackValue(shouldApplyCurrent)) return;
 
   if (shouldApplyCurrent && current) {
     await switchToProfile(current.name);

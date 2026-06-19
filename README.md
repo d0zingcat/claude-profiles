@@ -36,8 +36,26 @@ claude-profiles use proxy
 # 一键还原到切换前
 claude-profiles restore
 
-# 查看备份列表
+# 还原到 Claude 官方配置
+claude-profiles official
+
+# 交互式切换（含官方配置选项）
+claude-profiles use
+
+# 交互管理备份（Esc 返回上一步）
 claude-profiles backups
+
+# 仅列出，不交互
+claude-profiles backups --list
+
+# 直接进入删除（多选）
+claude-profiles backups --delete
+
+# 交互式选择备份还原
+claude-profiles restore
+
+# 快速还原最近一次
+claude-profiles undo
 
 # 查看当前配置
 claude-profiles current
@@ -68,9 +86,12 @@ claude-profiles remove proxy
 |------|------|
 | `list` / `ls` | 列出所有 profile |
 | `add [name]` | 交互式添加 profile（提供完整参数时为命令行模式） |
-| `use [name]` / `switch` | 交互式切换 profile（提供名称时直接切换） |
-| `restore [id]` / `undo` | 一键还原到切换前的配置 |
-| `backups` / `backup` | 列出切换备份 |
+| `use [name]` / `switch` | 交互式切换 profile 或官方配置 |
+| `official` | 还原到 Claude 官方配置 |
+| `restore [id]` | 交互式或指定 ID 还原备份 |
+| `undo` | 快速还原最近一次备份 |
+| `backups` / `backup` | 交互管理备份（`--list` 仅列出，`--restore` / `--delete` 直达） |
+| `backups delete [id]` | 删除备份（支持交互多选） |
 | `current` | 显示当前生效配置 |
 | `import cc-switch` | 从 cc-switch 数据库导入 Claude provider |
 | `edit [name]` | 交互式编辑 profile |

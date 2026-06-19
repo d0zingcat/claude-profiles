@@ -31,7 +31,7 @@ export interface SwitchBackup {
   createdAt: string;
   fromProfile?: string;
   toProfile: string;
-  reason: "switch" | "restore";
+  reason: "switch" | "restore" | "official";
   settings: ClaudeSettings;
 }
 

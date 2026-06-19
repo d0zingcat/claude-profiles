@@ -89,6 +89,35 @@ export async function listBackups(): Promise<SwitchBackup[]> {
   }
 }
 
+export async function deleteBackup(id: string): Promise<SwitchBackup> {
+  const backup = await getBackup(id);
+  if (!backup) {
+    throw new Error(`未找到备份: ${id}`);
+  }
+
+  await unlink(backupPath(id));
+
+  const config = await loadConfig();
+  if (config.lastBackupId === id) {
+    const remaining = await listBackups();
+    await saveConfig({
+      ...config,
+      lastBackupId: remaining[0]?.id,
+    });
+  }
+
+  return backup;
+}
+
+export async function deleteBackups(ids: string[]): Promise<number> {
+  let deleted = 0;
+  for (const id of ids) {
+    await deleteBackup(id);
+    deleted += 1;
+  }
+  return deleted;
+}
+
 async function pruneOldBackups(): Promise<void> {
   const backups = await listBackups();
   const stale = backups.slice(MAX_BACKUPS);
