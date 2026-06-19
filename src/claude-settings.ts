@@ -104,6 +104,26 @@ export function envToProfile(
   };
 }
 
+export function isProfileSynced(
+  profile: Profile,
+  settings: ClaudeSettings,
+): boolean {
+  const expected = profileToEnv(profile);
+  const env = settings.env ?? {};
+
+  for (const key of PROFILE_ENV_KEYS) {
+    const expectedValue = expected[key];
+    const actualValue = env[key];
+    if (expectedValue !== undefined) {
+      if (actualValue !== expectedValue) return false;
+    } else if (actualValue !== undefined) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export async function applyProfileSettings(
   profile: Profile,
   currentSettings?: ClaudeSettings,

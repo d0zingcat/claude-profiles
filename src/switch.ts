@@ -2,6 +2,7 @@ import { findProfile, loadConfig, setActiveProfile } from "./config.js";
 import {
   applyProfileSettings,
   detectActiveProfileName,
+  isProfileSynced,
   readClaudeSettings,
 } from "./claude-settings.js";
 import { createSwitchBackup } from "./backup.js";
@@ -13,16 +14,13 @@ export async function switchToProfile(name: string): Promise<void> {
     throw new Error(`未找到 profile: ${name}`);
   }
 
-  if (config.active === name) {
-    const settings = await readClaudeSettings();
-    const detected = detectActiveProfileName(config.profiles, settings);
-    if (detected === name) {
-      console.log(`当前已是 profile: ${name}`);
-      return;
-    }
+  const currentSettings = await readClaudeSettings();
+
+  if (config.active === name && isProfileSynced(profile, currentSettings)) {
+    console.log(`当前已是 profile: ${name}`);
+    return;
   }
 
-  const currentSettings = await readClaudeSettings();
   const fromProfile =
     config.active ?? detectActiveProfileName(config.profiles, currentSettings);
 
