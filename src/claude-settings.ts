@@ -104,6 +104,28 @@ export function envToProfile(
   };
 }
 
+export function buildOfficialSettings(settings: ClaudeSettings): ClaudeSettings {
+  const nextEnv = { ...(settings.env ?? {}) };
+  for (const key of PROFILE_ENV_KEYS) {
+    delete nextEnv[key];
+  }
+
+  const next = { ...settings };
+  if (Object.keys(nextEnv).length > 0) {
+    next.env = nextEnv;
+  } else {
+    delete next.env;
+  }
+  return next;
+}
+
+export function isOfficialSettings(settings: ClaudeSettings): boolean {
+  const env = settings.env ?? {};
+  return !(PROFILE_ENV_KEYS as readonly string[]).some(
+    (key) => env[key] !== undefined,
+  );
+}
+
 export function isProfileSynced(
   profile: Profile,
   settings: ClaudeSettings,
