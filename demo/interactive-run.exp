@@ -1,0 +1,16 @@
+#!/usr/bin/expect -f
+set timeout 30
+log_user 1
+
+spawn clp run
+
+expect -re "选择要临时使用的 profile"
+sleep 1.5
+send -- "\r"
+
+expect -re "临时使用 profile: work"
+expect -re "退出后 ~/.claude/settings.json 保持不变"
+sleep 0.2
+send -- "\003"
+
+expect eof
