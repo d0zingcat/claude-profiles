@@ -7,6 +7,7 @@ import { importFromCcSwitch } from "./commands/import-cc-switch.js";
 import { printProfiles } from "./commands/list.js";
 import { useOfficial } from "./commands/official.js";
 import { removeProfileByName } from "./commands/remove.js";
+import { runWithProfile } from "./commands/run.js";
 import { useProfile } from "./commands/use.js";
 import { loadConfig } from "./config.js";
 import { CC_SWITCH_DB_PATH } from "./paths.js";
@@ -46,6 +47,16 @@ program
   .description("切换到指定 profile 或官方配置（无参数时交互选择）")
   .action(async (name?: string) => {
     await useProfile(name);
+  });
+
+program
+  .command("run [name]")
+  .description(
+    "临时使用指定 profile 启动 Claude Code（不修改 ~/.claude/settings.json）",
+  )
+  .allowExcessArguments(true)
+  .action(async (name?: string) => {
+    await runWithProfile(name);
   });
 
 program

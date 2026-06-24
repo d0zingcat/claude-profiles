@@ -24,6 +24,12 @@ claude-profiles add
 # 交互式切换
 claude-profiles use
 
+# 临时用某 profile 启动 Claude Code（不改动持久配置）
+claude-profiles run
+
+# 指定 profile 启动，并把额外参数传给 claude
+claude-profiles run work -- --add-dir ./src
+
 # 命令行添加（跳过交互）
 claude-profiles add proxy \
   --url https://api.example.com \
@@ -87,6 +93,7 @@ claude-profiles remove proxy
 | `list` / `ls` | 列出所有 profile |
 | `add [name]` | 交互式添加 profile（提供完整参数时为命令行模式） |
 | `use [name]` / `switch` | 交互式切换 profile 或官方配置 |
+| `run [name]` | 临时用 profile 启动 Claude Code，退出后持久配置不变 |
 | `official` | 还原到 Claude 官方配置 |
 | `restore [id]` | 交互式或指定 ID 还原备份 |
 | `undo` | 快速还原最近一次备份 |

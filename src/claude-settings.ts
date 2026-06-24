@@ -146,12 +146,11 @@ export function isProfileSynced(
   return true;
 }
 
-export async function applyProfileSettings(
+export function buildProfileSettings(
   profile: Profile,
-  currentSettings?: ClaudeSettings,
-): Promise<void> {
-  const settings = currentSettings ?? (await readClaudeSettings());
-  const nextEnv = { ...(settings.env ?? {}) };
+  currentSettings: ClaudeSettings = {},
+): ClaudeSettings {
+  const nextEnv = { ...(currentSettings.env ?? {}) };
 
   for (const key of PROFILE_ENV_KEYS) {
     delete nextEnv[key];
@@ -159,13 +158,20 @@ export async function applyProfileSettings(
 
   Object.assign(nextEnv, profileToEnv(profile));
 
-  await writeClaudeSettings(
-    {
-      ...settings,
-      env: nextEnv,
-    },
-    { skipBackup: true },
-  );
+  return {
+    ...currentSettings,
+    env: nextEnv,
+  };
+}
+
+export async function applyProfileSettings(
+  profile: Profile,
+  currentSettings?: ClaudeSettings,
+): Promise<void> {
+  const settings = currentSettings ?? (await readClaudeSettings());
+  await writeClaudeSettings(buildProfileSettings(profile, settings), {
+    skipBackup: true,
+  });
 }
 
 /** @deprecated 请使用 switchToProfile */
