@@ -2,6 +2,10 @@
 
 轻量 CLI 工具，用于在多个 Claude API 端点配置之间管理和切换。类似 [cc-switch](https://github.com/farion1231/cc-switch)，但只聚焦 Claude Code 的端点切换。
 
+**不想读文档？** 看约 1 分钟的终端演示：
+
+[![asciicast](https://asciinema.org/a/vO1bi0JTeGspfhD8.svg)](https://asciinema.org/a/vO1bi0JTeGspfhD8)
+
 ## 安装
 
 ```bash

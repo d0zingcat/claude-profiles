@@ -1,0 +1,45 @@
+#!/usr/bin/expect -f
+set timeout 30
+log_user 1
+
+proc type_slow {text {delay 0.12}} {
+  foreach char [split $text ""] {
+    send -- $char
+    sleep $delay
+  }
+}
+
+spawn clp add
+
+expect -re "名称"
+sleep 1.2
+type_slow "side-project"
+send -- "\r"
+
+expect -re "添加方式"
+sleep 1.8
+send -- "\r"
+
+expect -re "ANTHROPIC_BASE_URL"
+sleep 1.0
+type_slow "https://api.side.example.com" 0.09
+send -- "\r"
+
+expect -re "认证方式"
+sleep 1.8
+send -- "\r"
+
+expect -re "ANTHROPIC_AUTH_TOKEN"
+sleep 1.0
+type_slow "sk-side-demo-token-9999" 0.1
+send -- "\r"
+
+expect -re "配置模型映射"
+sleep 1.2
+send -- "n\r"
+
+expect -re "保存后立即切换"
+sleep 1.2
+send -- "n\r"
+
+expect eof

@@ -45,13 +45,20 @@ export async function runWithProfile(
   name?: string,
   claudeArgs: string[] = getPassthroughArgs(),
 ): Promise<void> {
+  let profileName = name;
+  let extraArgs = claudeArgs;
+
+  // commander 可能把 `clp run -- --version` 里的 `--version` 误解析为 profile 名
+  if (profileName?.startsWith("-")) {
+    extraArgs = [profileName, ...extraArgs];
+    profileName = undefined;
+  }
+
   const config = await loadConfig();
 
   if (config.profiles.length === 0) {
     throw new Error("暂无 profile，请先使用 claude-profiles add 添加");
   }
-
-  let profileName = name;
 
   if (!profileName) {
     const selected = await selectProfile(
@@ -90,7 +97,7 @@ export async function runWithProfile(
     console.log(`  BASE URL: ${profile.baseUrl}`);
     console.log("  退出后 ~/.claude/settings.json 保持不变");
 
-    const exitCode = await runClaude(["--settings", settingsPath, ...claudeArgs]);
+    const exitCode = await runClaude(["--settings", settingsPath, ...extraArgs]);
     process.exitCode = exitCode === 0 ? undefined : exitCode;
   } finally {
     await rm(tempDir, { recursive: true, force: true });
