@@ -5,12 +5,21 @@
 ## 安装
 
 ```bash
+# 从 npm 安装（推荐）
+pnpm install -g @d0zingcat/claude-profiles
+# 或
+npm install -g @d0zingcat/claude-profiles
+
+# 从源码安装
+git clone https://github.com/d0zingcat/claude-profiles.git
+cd claude-profiles
+pnpm install && pnpm build
 pnpm install -g .
-# 或发布后
-pnpm install -g claude-profiles
 ```
 
 安装后可使用 `claude-profiles` 或缩写 `clp`。
+
+> npm 上的 `claude-profiles` 是另一个项目；本工具发布为 `@d0zingcat/claude-profiles`。
 
 ## 快速开始
 
