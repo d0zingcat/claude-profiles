@@ -1,7 +1,10 @@
 {
-  "name": "claude-profiles",
+  "name": "@d0zingcat/claude-profiles",
   "version": "0.1.0",
   "description": "CLI tool to manage and switch between multiple Claude API endpoint profiles",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "claude-profiles": "./dist/cli.js",
