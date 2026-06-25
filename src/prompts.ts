@@ -176,7 +176,7 @@ export async function promptProfileName(
   existingNames: string[],
   defaultName?: string,
 ): Promise<string | typeof PROMPT_BACK> {
-  return withPromptBack(() =>
+  const result = await withPromptBack(() =>
     input({
       message: `名称 ${PROMPT_HINT_BACK}`,
       default: defaultName,
@@ -190,8 +190,10 @@ export async function promptProfileName(
         }
         return true;
       },
-    }).then((value) => value.trim()),
+    }),
   );
+  if (isBackValue(result)) return PROMPT_BACK;
+  return result.trim();
 }
 
 export async function promptAddMode(): Promise<
@@ -211,13 +213,15 @@ export async function promptAddMode(): Promise<
 export async function promptBaseUrl(
   defaultValue?: string,
 ): Promise<string | typeof PROMPT_BACK> {
-  return withPromptBack(() =>
+  const result = await withPromptBack(() =>
     input({
       message: `API 端点 (ANTHROPIC_BASE_URL) ${PROMPT_HINT_BACK}`,
       default: defaultValue,
       validate: (value) => (value.trim() ? true : "端点 URL 不能为空"),
-    }).then((value) => value.trim()),
+    }),
   );
+  if (isBackValue(result)) return PROMPT_BACK;
+  return result.trim();
 }
 
 export async function promptNewAuth(): Promise<
