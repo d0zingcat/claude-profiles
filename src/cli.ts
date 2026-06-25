@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import packageJson from "../package.json";
 import { addProfile } from "./commands/add.js";
 import { deleteBackupById, restoreBackup, showBackups } from "./commands/backups.js";
 import { showCurrent } from "./commands/current.js";
@@ -18,7 +19,7 @@ const program = new Command();
 program
   .name("claude-profiles")
   .description("管理并切换多个 Claude API 端点配置")
-  .version("0.1.0");
+  .version(packageJson.version);
 
 program
   .command("list")

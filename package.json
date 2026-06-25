@@ -1,6 +1,6 @@
 {
   "name": "@d0zingcat/claude-profiles",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CLI tool to manage and switch between multiple Claude API endpoint profiles",
   "publishConfig": {
     "access": "public"
