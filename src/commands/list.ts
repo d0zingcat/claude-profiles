@@ -1,4 +1,4 @@
-import type { Profile } from "./types.js";
+import type { Profile } from "../types.js";
 import { maskSecret } from "../paths.js";
 
 export function printProfiles(

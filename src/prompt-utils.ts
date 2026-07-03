@@ -54,3 +54,8 @@ export function isBackValue<T>(
 }
 
 export const PROMPT_HINT_BACK = "（Esc 返回上一步）";
+
+/** 启用 Emacs 风格导航：Ctrl+P 上移、Ctrl+N 下移（方向键仍可用） */
+export const PROMPT_THEME = {
+  keybindings: ["emacs"] as const,
+};
