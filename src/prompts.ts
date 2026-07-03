@@ -6,6 +6,7 @@ import { maskSecret } from "./paths.js";
 import {
   PROMPT_BACK,
   PROMPT_HINT_BACK,
+  PROMPT_THEME,
   isBackValue,
   withPromptBack,
 } from "./prompt-utils.js";
@@ -22,6 +23,7 @@ export async function selectUseTarget(
   return withPromptBack(() =>
     select({
       message: `选择要切换的配置 ${PROMPT_HINT_BACK}`,
+      theme: PROMPT_THEME,
       choices: [
         {
           name: "官方配置 (Official) — 清除第三方 API 端点",
@@ -45,6 +47,7 @@ export async function selectProfile(
   return withPromptBack(() =>
     select({
       message: `${message} ${PROMPT_HINT_BACK}`,
+      theme: PROMPT_THEME,
       choices: [
         ...profiles.map((p) => ({
           name: `${p.name}${p.name === active ? " (当前)" : ""} — ${p.baseUrl}`,
@@ -62,6 +65,7 @@ export async function selectBackupAction(): Promise<
   return withPromptBack(() =>
     select({
       message: `选择操作 ${PROMPT_HINT_BACK}`,
+      theme: PROMPT_THEME,
       choices: [
         { name: "还原备份", value: "restore" as const },
         { name: "删除备份", value: "delete" as const },
@@ -90,15 +94,17 @@ export async function selectCheckboxWithBack<T extends string>(
   const result = await withPromptBack(() =>
     checkbox({
       message: `${message}（空格多选，回车确认，Esc 返回上一步）`,
+      theme: PROMPT_THEME,
       choices: [
         { name: "← 返回上一步", value: PROMPT_BACK as T },
         new Separator(),
         ...choices,
       ],
       validate: (value) => {
-        if ((value as string[]).includes(PROMPT_BACK)) return true;
-        if (options?.validate) return options.validate(value as T[]);
-        return value.length > 0
+        const selected = [...value] as unknown as T[];
+        if (selected.includes(PROMPT_BACK as T)) return true;
+        if (options?.validate) return options.validate(selected);
+        return selected.length > 0
           ? true
           : (options?.emptyMessage ?? "请至少选择一项");
       },
@@ -160,6 +166,7 @@ export async function selectBackup(
   const selected = await withPromptBack(() =>
     select({
       message: `${options?.message ?? "选择备份"} ${options?.allowBack !== false ? PROMPT_HINT_BACK : ""}`.trim(),
+      theme: PROMPT_THEME,
       choices,
       default: latestId && backups.some((b) => b.id === latestId)
         ? latestId
@@ -202,6 +209,7 @@ export async function promptAddMode(): Promise<
   return withPromptBack(() =>
     select({
       message: `添加方式 ${PROMPT_HINT_BACK}`,
+      theme: PROMPT_THEME,
       choices: [
         { name: "手动填写 API 端点与认证信息", value: "manual" as const },
         { name: "从当前 ~/.claude/settings.json 导入", value: "fromCurrent" as const },
@@ -230,6 +238,7 @@ export async function promptNewAuth(): Promise<
   const authType = await withPromptBack(() =>
     select<AuthType>({
       message: `认证方式 ${PROMPT_HINT_BACK}`,
+      theme: PROMPT_THEME,
       choices: [
         { name: "AUTH TOKEN (ANTHROPIC_AUTH_TOKEN)", value: "token" },
         { name: "API KEY (ANTHROPIC_API_KEY)", value: "apiKey" },
@@ -266,6 +275,7 @@ export async function promptEditAuth(
   const authType = await withPromptBack(() =>
     select<EditAuthType>({
       message: `认证方式 ${PROMPT_HINT_BACK}`,
+      theme: PROMPT_THEME,
       choices: [
         {
           name: profile.authToken

@@ -1,5 +1,4 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
 import type { ProfilesConfig } from "./types.js";
 import { CONFIG_DIR, CONFIG_FILE } from "./paths.js";
 
