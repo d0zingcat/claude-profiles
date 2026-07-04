@@ -6,6 +6,7 @@ import { showCurrent } from "./commands/current.js";
 import { editProfile } from "./commands/edit.js";
 import { exportProfiles } from "./commands/export.js";
 import { importFromCcSwitch } from "./commands/import-cc-switch.js";
+import { importProfiles } from "./commands/import-profiles.js";
 import { printProfiles } from "./commands/list.js";
 import { useOfficial } from "./commands/official.js";
 import { removeProfileByName } from "./commands/remove.js";
@@ -141,6 +142,16 @@ program
 const importCmd = program
   .command("import")
   .description("从外部来源导入 profile");
+
+importCmd
+  .command("profiles [file]")
+  .description("从 JSON 文件导入 profile（file 为 - 时从 stdin 读取）")
+  .option("--all", "导入全部 profile（非交互）")
+  .option("--overwrite", "覆盖同名 profile")
+  .option("--apply <name>", "导入后切换到指定 profile")
+  .action(async (file: string | undefined, options) => {
+    await importProfiles(file, options);
+  });
 
 importCmd
   .command("cc-switch")
