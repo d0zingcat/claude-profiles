@@ -4,6 +4,7 @@ import { addProfile } from "./commands/add.js";
 import { deleteBackupById, restoreBackup, showBackups } from "./commands/backups.js";
 import { showCurrent } from "./commands/current.js";
 import { editProfile } from "./commands/edit.js";
+import { exportProfiles } from "./commands/export.js";
 import { importFromCcSwitch } from "./commands/import-cc-switch.js";
 import { printProfiles } from "./commands/list.js";
 import { useOfficial } from "./commands/official.js";
@@ -123,6 +124,18 @@ program
   .description("快速还原到最近一次备份")
   .action(async () => {
     await restoreBackup(undefined, { latest: true });
+  });
+
+program
+  .command("export [file]")
+  .description("导出 profile 到 JSON 文件（file 为 - 时输出到 stdout）")
+  .option("--no-secrets", "不导出认证 Token/API Key")
+  .option("--profile <name>", "只导出指定 profile，可重复", (value, previous: string[] = []) => [
+    ...previous,
+    value,
+  ])
+  .action(async (file: string | undefined, options) => {
+    await exportProfiles(file, options);
   });
 
 const importCmd = program
