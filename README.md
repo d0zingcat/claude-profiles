@@ -85,6 +85,18 @@ claude-profiles import cc-switch
 # 非交互导入全部，并切换到 cc-switch 当前 provider
 claude-profiles import cc-switch --all --apply-current
 
+# 导出 profiles（默认包含认证信息，适合迁移）
+claude-profiles export profiles-export.json
+
+# 导出时排除 Token/API Key
+claude-profiles export public-profiles.json --no-secrets
+
+# 从导出文件导入全部 profile
+claude-profiles import profiles profiles-export.json --all
+
+# 覆盖同名 profile，并导入后切换
+claude-profiles import profiles profiles-export.json --all --overwrite --apply work
+
 # 交互式编辑
 claude-profiles edit work
 
@@ -114,6 +126,8 @@ claude-profiles remove proxy
 | `backups delete [id]` | 删除备份（支持交互多选） |
 | `current` | 显示当前生效配置 |
 | `import cc-switch` | 从 cc-switch 数据库导入 Claude provider |
+| `export [file]` | 导出 profile 到 JSON 文件 |
+| `import profiles [file]` | 从 JSON 文件导入 profile |
 | `edit [name]` | 交互式编辑 profile |
 | `remove <name>` / `rm` | 删除 profile |
 
@@ -137,6 +151,25 @@ claude-profiles remove proxy
 | `--apply-current` | 导入后切换到 cc-switch 当前 provider |
 
 > 官方 OAuth 登录类 provider（无 `ANTHROPIC_BASE_URL`）会自动跳过。
+
+### export 选项
+
+| 选项 | 说明 |
+|------|------|
+| `--no-secrets` | 不导出 `ANTHROPIC_AUTH_TOKEN` / `ANTHROPIC_API_KEY` |
+| `--profile <name>` | 只导出指定 profile，可重复传入 |
+
+> 默认导出包含认证信息，适合个人设备迁移；分享文件前请使用 `--no-secrets`。
+
+### import profiles 选项
+
+| 选项 | 说明 |
+|------|------|
+| `--all` | 导入全部 profile（非交互） |
+| `--overwrite` | 覆盖同名 profile |
+| `--apply <name>` | 导入后切换到指定 profile |
+
+`file` 为 `-` 时，`export` 输出到 stdout，`import profiles` 从 stdin 读取。
 
 ## 开发
 
