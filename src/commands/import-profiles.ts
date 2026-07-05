@@ -65,6 +65,15 @@ export async function importProfiles(
     return;
   }
 
+  if (options.apply) {
+    const canApply = imported.profiles.some(
+      (profile) => profile.name === options.apply,
+    );
+    if (!canApply) {
+      throw new Error(`无法切换，未找到 profile: ${options.apply}`);
+    }
+  }
+
   const config = await loadConfig();
   const result = mergeImportedProfiles(config, imported, {
     overwrite: options.overwrite,
@@ -82,12 +91,6 @@ export async function importProfiles(
   );
 
   if (options.apply) {
-    const canApply = result.config.profiles.some(
-      (profile) => profile.name === options.apply,
-    );
-    if (!canApply) {
-      throw new Error(`无法切换，未找到 profile: ${options.apply}`);
-    }
     await switchToProfile(options.apply);
   }
 }
