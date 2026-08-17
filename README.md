@@ -107,7 +107,7 @@ claude-profiles remove proxy
 ## 工作原理
 
 - Profile 保存在 `~/.claude-profiles/profiles.json`
-- 切换时更新 `~/.claude/settings.json` 中的 `env` 字段（`ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN` 等）
+- 切换时更新 `~/.claude/settings.json` 中的 `env` 字段（`ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN`、`ANTHROPIC_CUSTOM_MODEL_OPTION*` 等）；这些键会按目标 profile 整组替换，不会把上一个 profile 的值留下来
 - **切换前**会将完整的 `settings.json` 备份到 `~/.claude-profiles/backups/`，可用 `restore` 一键还原
 - 其他 settings 字段（如 `permissions`、`model`）在切换时从备份中完整保留
 
