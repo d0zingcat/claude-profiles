@@ -1,7 +1,7 @@
 import { copyFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { ClaudeSettings, Profile, ProfileModels } from "./types.js";
-import { PROFILE_ENV_KEYS } from "./types.js";
+import { isProfileManagedEnvKey, PROFILE_ENV_KEYS } from "./types.js";
 import { CLAUDE_BACKUP_DIR, CLAUDE_SETTINGS_PATH } from "./paths.js";
 
 export async function readClaudeSettings(): Promise<ClaudeSettings> {
@@ -104,11 +104,28 @@ export function envToProfile(
   };
 }
 
+function deleteManagedEnvKeys(env: Record<string, string>): void {
+  for (const key of Object.keys(env)) {
+    if (isProfileManagedEnvKey(key)) delete env[key];
+  }
+}
+
+function managedEnvKeysOf(
+  ...envs: Array<Record<string, string> | undefined>
+): string[] {
+  const keys = new Set<string>(PROFILE_ENV_KEYS);
+  for (const env of envs) {
+    if (!env) continue;
+    for (const key of Object.keys(env)) {
+      if (isProfileManagedEnvKey(key)) keys.add(key);
+    }
+  }
+  return [...keys];
+}
+
 export function buildOfficialSettings(settings: ClaudeSettings): ClaudeSettings {
   const nextEnv = { ...(settings.env ?? {}) };
-  for (const key of PROFILE_ENV_KEYS) {
-    delete nextEnv[key];
-  }
+  deleteManagedEnvKeys(nextEnv);
 
   const next = { ...settings };
   if (Object.keys(nextEnv).length > 0) {
@@ -121,9 +138,7 @@ export function buildOfficialSettings(settings: ClaudeSettings): ClaudeSettings 
 
 export function isOfficialSettings(settings: ClaudeSettings): boolean {
   const env = settings.env ?? {};
-  return !(PROFILE_ENV_KEYS as readonly string[]).some(
-    (key) => env[key] !== undefined,
-  );
+  return !Object.keys(env).some((key) => isProfileManagedEnvKey(key));
 }
 
 export function isProfileSynced(
@@ -133,7 +148,7 @@ export function isProfileSynced(
   const expected = profileToEnv(profile);
   const env = settings.env ?? {};
 
-  for (const key of PROFILE_ENV_KEYS) {
+  for (const key of managedEnvKeysOf(expected, env)) {
     const expectedValue = expected[key];
     const actualValue = env[key];
     if (expectedValue !== undefined) {
@@ -151,11 +166,7 @@ export function buildProfileSettings(
   currentSettings: ClaudeSettings = {},
 ): ClaudeSettings {
   const nextEnv = { ...(currentSettings.env ?? {}) };
-
-  for (const key of PROFILE_ENV_KEYS) {
-    delete nextEnv[key];
-  }
-
+  deleteManagedEnvKeys(nextEnv);
   Object.assign(nextEnv, profileToEnv(profile));
 
   return {

@@ -56,6 +56,19 @@ describe("envToProfile", () => {
     assert.deepEqual(parsed.models, profile.models);
     assert.deepEqual(parsed.env, profile.env);
   });
+
+  it("将 ANTHROPIC_CUSTOM_MODEL_OPTION* 保留为 extra env", () => {
+    const parsed = envToProfile("imported", {
+      ANTHROPIC_BASE_URL: "https://api.example.com",
+      ANTHROPIC_AUTH_TOKEN: "token",
+      ANTHROPIC_CUSTOM_MODEL_OPTION: "deepseek-v4-pro",
+      ANTHROPIC_CUSTOM_MODEL_OPTION_NAME: "DeepSeek V4 Pro",
+    });
+    assert.deepEqual(parsed.env, {
+      ANTHROPIC_CUSTOM_MODEL_OPTION: "deepseek-v4-pro",
+      ANTHROPIC_CUSTOM_MODEL_OPTION_NAME: "DeepSeek V4 Pro",
+    });
+  });
 });
 
 describe("buildProfileSettings", () => {
@@ -73,6 +86,43 @@ describe("buildProfileSettings", () => {
     assert.equal(settings.env?.ANTHROPIC_BASE_URL, profile.baseUrl);
     assert.equal(settings.env?.ANTHROPIC_AUTH_TOKEN, profile.authToken);
   });
+
+  it("替换 ANTHROPIC_CUSTOM_MODEL_OPTION* 并清除旧值", () => {
+    const settings = buildProfileSettings(
+      {
+        ...profile,
+        env: {
+          ANTHROPIC_CUSTOM_MODEL_OPTION: "deepseek-v4-pro",
+          ANTHROPIC_CUSTOM_MODEL_OPTION_NAME: "DeepSeek V4 Pro",
+        },
+      },
+      {
+        env: {
+          ANTHROPIC_CUSTOM_MODEL_OPTION: "old-model",
+          ANTHROPIC_CUSTOM_MODEL_OPTION_NAME: "Old",
+          ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION: "old desc",
+          KEEP_ME: "yes",
+        },
+      },
+    );
+
+    assert.equal(settings.env?.ANTHROPIC_CUSTOM_MODEL_OPTION, "deepseek-v4-pro");
+    assert.equal(settings.env?.ANTHROPIC_CUSTOM_MODEL_OPTION_NAME, "DeepSeek V4 Pro");
+    assert.equal(settings.env?.ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION, undefined);
+    assert.equal(settings.env?.KEEP_ME, "yes");
+  });
+
+  it("目标 profile 没有 custom model option 时清除旧值", () => {
+    const settings = buildProfileSettings(profile, {
+      env: {
+        ANTHROPIC_CUSTOM_MODEL_OPTION: "old-model",
+        KEEP_ME: "yes",
+      },
+    });
+
+    assert.equal(settings.env?.ANTHROPIC_CUSTOM_MODEL_OPTION, undefined);
+    assert.equal(settings.env?.KEEP_ME, "yes");
+  });
 });
 
 describe("buildOfficialSettings", () => {
@@ -81,6 +131,8 @@ describe("buildOfficialSettings", () => {
       theme: "dark",
       env: {
         ANTHROPIC_BASE_URL: "https://api.example.com",
+        ANTHROPIC_CUSTOM_MODEL_OPTION: "old-model",
+        ANTHROPIC_CUSTOM_MODEL_OPTION_NAME: "Old",
         KEEP_ME: "yes",
       },
     });
@@ -95,6 +147,10 @@ describe("isOfficialSettings", () => {
     assert.equal(isOfficialSettings({ env: { KEEP_ME: "yes" } }), true);
     assert.equal(
       isOfficialSettings({ env: { ANTHROPIC_BASE_URL: "https://api.example.com" } }),
+      false,
+    );
+    assert.equal(
+      isOfficialSettings({ env: { ANTHROPIC_CUSTOM_MODEL_OPTION: "leftover" } }),
       false,
     );
   });
@@ -114,6 +170,36 @@ describe("isProfileSynced", () => {
       },
     });
     assert.equal(outOfSync, false);
+  });
+
+  it("custom model option 残留或取值不同时判定为未同步", () => {
+    const withOption: Profile = {
+      ...profile,
+      env: { ANTHROPIC_CUSTOM_MODEL_OPTION: "deepseek-v4-pro" },
+    };
+
+    assert.equal(
+      isProfileSynced(withOption, { env: profileToEnv(withOption) }),
+      true,
+    );
+    assert.equal(
+      isProfileSynced(withOption, {
+        env: {
+          ...profileToEnv(withOption),
+          ANTHROPIC_CUSTOM_MODEL_OPTION: "other",
+        },
+      }),
+      false,
+    );
+    assert.equal(
+      isProfileSynced(profile, {
+        env: {
+          ...profileToEnv(profile),
+          ANTHROPIC_CUSTOM_MODEL_OPTION: "leftover",
+        },
+      }),
+      false,
+    );
   });
 });
 

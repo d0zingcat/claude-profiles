@@ -50,3 +50,14 @@ export const PROFILE_ENV_KEYS = [
   "ANTHROPIC_MODEL",
   "ANTHROPIC_REASONING_MODEL",
 ] as const;
+
+const CUSTOM_MODEL_OPTION_KEY = "ANTHROPIC_CUSTOM_MODEL_OPTION";
+
+/** 切换 profile / 还原官方配置时会整组替换的 env 键，不会把上一个 profile 的值留下来 */
+export function isProfileManagedEnvKey(key: string): boolean {
+  if ((PROFILE_ENV_KEYS as readonly string[]).includes(key)) return true;
+  return (
+    key === CUSTOM_MODEL_OPTION_KEY ||
+    key.startsWith(`${CUSTOM_MODEL_OPTION_KEY}_`)
+  );
+}
