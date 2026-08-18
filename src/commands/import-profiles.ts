@@ -14,8 +14,12 @@ export interface ImportProfilesOptions {
   apply?: string;
 }
 
+function isStdinSource(file: string | undefined): file is undefined | "-" {
+  return !file || file === "-";
+}
+
 async function readInput(file: string | undefined): Promise<string> {
-  if (!file || file === "-") {
+  if (isStdinSource(file)) {
     return new Promise((resolve, reject) => {
       let data = "";
       process.stdin.setEncoding("utf8");
@@ -56,9 +60,10 @@ export async function importProfiles(
     return;
   }
 
-  const selectedNames = options.all
-    ? imported.profiles.map((profile) => profile.name)
-    : await pickProfileNames(imported.profiles.map((profile) => profile.name));
+  const selectedNames =
+    options.all || isStdinSource(file)
+      ? imported.profiles.map((profile) => profile.name)
+      : await pickProfileNames(imported.profiles.map((profile) => profile.name));
 
   if (isBackValue(selectedNames)) {
     console.log("已取消");
