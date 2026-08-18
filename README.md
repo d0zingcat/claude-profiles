@@ -94,6 +94,9 @@ claude-profiles export public-profiles.json --no-secrets
 # 从导出文件导入全部 profile
 claude-profiles import profiles profiles-export.json --all
 
+# 通过管道导入（stdin 无法交互选择，自动导入全部）
+claude-profiles export | claude-profiles import profiles -
+
 # 覆盖同名 profile，并导入后切换
 claude-profiles import profiles profiles-export.json --all --overwrite --apply work
 
@@ -169,7 +172,7 @@ claude-profiles remove proxy
 | `--overwrite` | 覆盖同名 profile |
 | `--apply <name>` | 导入后切换到指定 profile |
 
-`file` 为 `-` 时，`export` 输出到 stdout，`import profiles` 从 stdin 读取。
+`file` 为 `-` 或省略时，`export` 输出到 stdout，`import profiles` 从 stdin 读取。从 stdin 读取时无法做交互多选，会自动导入全部 profile。
 
 ## 开发
 
